@@ -58,9 +58,14 @@ public class SongController {
 			HttpServletRequest request) {
 
 		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("GET %s", Utils.getUrl(request)));
-
-		return null;
+		
+		DbQueryStatus dbQueryStatus = songDal.getSongTitleById(songId);
+		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+		
+		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_OK)) {
+			response.put("data", dbQueryStatus.getMessage());
+		}
+		return response;
 	}
 
 	
@@ -69,9 +74,11 @@ public class SongController {
 			HttpServletRequest request) {
 
 		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("DELETE %s", Utils.getUrl(request)));
-
-		return null;
+		
+		DbQueryStatus dbQueryStatus = songDal.deleteSongById(songId);
+		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+		
+		return response;
 	}
 
 	
@@ -80,11 +87,33 @@ public class SongController {
 			HttpServletRequest request) {
 
 		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("POST %s", Utils.getUrl(request)));
-
-		return null;
+		
+		if (params.containsKey("songName") && params.containsKey("songArtistFullName") && params.containsKey("songAlbum")) {
+			if (params.get("songName") instanceof String && params.get("songArtistFullName") instanceof String && params.get("songAlbum") instanceof String) {
+				Song songToAdd = new Song(params.get("songName"), params.get("songArtistFullName"), params.get("songAlbum"));
+				
+				DbQueryStatus dbQueryStatus = songDal.addSong(songToAdd);
+				if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_GENERIC)) {
+					response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+					return response;
+				}
+				response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+				response.put("data", dbQueryStatus.getMessage());
+				
+				return response;
+			}
+			else {
+				DbQueryStatus dbQueryStatus = new DbQueryStatus("Data provided for information was not string type.", DbQueryExecResult.QUERY_ERROR_GENERIC);
+				response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+				return response;
+			}
+		}
+		else {
+			DbQueryStatus dbQueryStatus = new DbQueryStatus("Missing information for creating song", DbQueryExecResult.QUERY_ERROR_GENERIC);
+			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+			return response;
+		}
 	}
-
 	
 	@RequestMapping(value = "/updateSongFavouritesCount/{songId}", method = RequestMethod.PUT)
 	public @ResponseBody Map<String, Object> updateFavouritesCount(@PathVariable("songId") String songId,
@@ -92,7 +121,25 @@ public class SongController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		response.put("data", String.format("PUT %s", Utils.getUrl(request)));
-
-		return null;
+		
+		
+		//localhost:3001/updateSongFavouritesCount/1234?shouldDecrement=true
+		if (shouldDecrement.equals("true")) {
+			DbQueryStatus dbQueryStatus = songDal.updateSongFavouritesCount(songId, true);
+			
+			response.put("message", dbQueryStatus.getMessage());
+			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+			
+			return response;
+		} else if(shouldDecrement.equals("false")) {
+			DbQueryStatus dbQueryStatus = songDal.updateSongFavouritesCount(songId, false);
+			
+			response.put("message", dbQueryStatus.getMessage());
+			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+			
+			return response;
+		} else {
+			return null;
+		}
 	}
 }

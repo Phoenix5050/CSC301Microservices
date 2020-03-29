@@ -28,20 +28,13 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="target/generated-sources/annotations">
+	<classpathentry kind="lib" path="C:/Users/aaron/.m2/repository/org/neo4j/driver/neo4j-java-driver/1.7.2/neo4j-java-driver-1.7.2.jar" sourcepath="C:/Users/aaron/.m2/repository/org/neo4j/driver/neo4j-java-driver/1.7.2/neo4j-java-driver-1.7.2-sources.jar">
 		<attributes>
-			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
-			<attribute name="ignore_optional_problems" value="true"/>
-			<attribute name="m2e-apt" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="src" output="target/test-classes" path="target/generated-test-sources/test-annotations">
-		<attributes>
-			<attribute name="optional" value="true"/>
-			<attribute name="maven.pomderived" value="true"/>
-			<attribute name="ignore_optional_problems" value="true"/>
-			<attribute name="m2e-apt" value="true"/>
+			<attribute name="maven.groupId" value="org.neo4j.driver"/>
+			<attribute name="maven.artifactId" value="neo4j-java-driver"/>
+			<attribute name="maven.version" value="1.7.2"/>
+			<attribute name="maven.scope" value="compile"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
