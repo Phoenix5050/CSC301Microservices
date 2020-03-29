@@ -42,13 +42,15 @@ public class SongController {
 			HttpServletRequest request) {
 
 		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("GET %s", Utils.getUrl(request)));
-
+		
+		// call function and process query result as ok or error
 		DbQueryStatus dbQueryStatus = songDal.findSongById(songId);
-
-		response.put("message", dbQueryStatus.getMessage());
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-
+		
+		// since we need data returned as query result, check first if we returned an error
+		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_OK)) {
+			response.put("data", dbQueryStatus.getMessage());
+		}
 		return response;
 	}
 
@@ -59,9 +61,11 @@ public class SongController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		
+		// call function and process query result as ok or error
 		DbQueryStatus dbQueryStatus = songDal.getSongTitleById(songId);
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 		
+		// since we need data returned as query result, check first if we returned an error
 		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_OK)) {
 			response.put("data", dbQueryStatus.getMessage());
 		}
@@ -75,9 +79,11 @@ public class SongController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		
+		// call function and process query result as ok or error
 		DbQueryStatus dbQueryStatus = songDal.deleteSongById(songId);
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 		
+		// no data is returned in result of no errors so send response
 		return response;
 	}
 
@@ -88,17 +94,20 @@ public class SongController {
 
 		Map<String, Object> response = new HashMap<String, Object>();
 		
+		// check that we have all fields necessary to make a song
 		if (params.containsKey("songName") && params.containsKey("songArtistFullName") && params.containsKey("songAlbum")) {
+			// check that all the information in said fields is in a string format so we can process it
 			if (params.get("songName") instanceof String && params.get("songArtistFullName") instanceof String && params.get("songAlbum") instanceof String) {
 				Song songToAdd = new Song(params.get("songName"), params.get("songArtistFullName"), params.get("songAlbum"));
 				
+				// call function and process query result as ok or error
 				DbQueryStatus dbQueryStatus = songDal.addSong(songToAdd);
-				if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_GENERIC)) {
-					response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-					return response;
-				}
 				response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-				response.put("data", dbQueryStatus.getMessage());
+				
+				// since we need data returned as query result, check first if we returned an error
+				if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_OK)) {
+					response.put("data", dbQueryStatus.getMessage());
+				}
 				
 				return response;
 			}
@@ -119,27 +128,29 @@ public class SongController {
 	public @ResponseBody Map<String, Object> updateFavouritesCount(@PathVariable("songId") String songId,
 			@RequestParam("shouldDecrement") String shouldDecrement, HttpServletRequest request) {
 
-		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("data", String.format("PUT %s", Utils.getUrl(request)));
+		Map<String, Object> response = new HashMap<String, Object>();		
 		
-		
-		//localhost:3001/updateSongFavouritesCount/1234?shouldDecrement=true
+		// since we send the boolean, lets do the check here
 		if (shouldDecrement.equals("true")) {
+			// call function and process query result as ok or error
 			DbQueryStatus dbQueryStatus = songDal.updateSongFavouritesCount(songId, true);
-			
-			response.put("message", dbQueryStatus.getMessage());
 			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 			
+			// no data is returned in result of no errors so send response
 			return response;
 		} else if(shouldDecrement.equals("false")) {
+			// call function and process query result as ok or error
 			DbQueryStatus dbQueryStatus = songDal.updateSongFavouritesCount(songId, false);
-			
-			response.put("message", dbQueryStatus.getMessage());
 			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 			
+			// no data is returned in result of no errors so send response
 			return response;
 		} else {
-			return null;
+			// if the string is neither true nor false, we didn't get a boolean
+			// don't have to check if instance of string since sent as part of request and not in a body
+			DbQueryStatus dbQueryStatus = new DbQueryStatus("Boolean not provided (please ensure it is all lowercase)", DbQueryExecResult.QUERY_ERROR_GENERIC);
+			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+			return response;
 		}
 	}
 }
