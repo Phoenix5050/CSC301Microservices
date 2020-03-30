@@ -40,20 +40,66 @@ public class ProfileDriverImpl implements ProfileDriver {
 	
 	@Override
 	public DbQueryStatus createUserProfile(String userName, String fullName, String password) {
+		//POST
 		
-		return null;
+		try (Session session = ProfileMicroserviceApplication.driver.session()){
+			Transaction trans = session.beginTransaction();
+			
+			String queryStr = String.format("CREATE (:profile {userName: \"%s\", fullName: \"%s\", password: \"%s\"})", userName, fullName, password);
+			trans.run(queryStr);
+			
+			queryStr = String.format("CREATE (:playlist {plName: \"%s-favorites\"})", userName);
+			trans.run(queryStr);
+			
+			queryStr = String.format("MATCH (profile:profile),(playlist:playlist) WHERE (profile.userName=\"%s\" AND playlist.plName=\"%s-favorites\") CREATE (profile)-[:created]->(playlist)", userName, userName);
+			trans.run(queryStr);
+			
+			
+			
+			trans.success();
+
+    		return  new DbQueryStatus("Successfully created profile", DbQueryExecResult.QUERY_OK);
+    	} catch (Exception e) {
+    		return new DbQueryStatus("Profile could not be created", DbQueryExecResult.QUERY_ERROR_GENERIC);
+    	}
+		
+		
 	}
 
 	@Override
 	public DbQueryStatus followFriend(String userName, String frndUserName) {
+		//PUT
 		
-		return null;
+		try (Session session = ProfileMicroserviceApplication.driver.session()){
+			Transaction trans = session.beginTransaction();
+			
+			String queryStr = String.format("MATCH (follower:profile),(followee:profile) WHERE (follower.userName=\"%s\" AND followee.userName=\"%s\") CREATE (follower)-[:follows]->(followee)", userName, frndUserName);
+			trans.run(queryStr);
+			
+			trans.success();
+
+    		return  new DbQueryStatus("Successfully followed profile", DbQueryExecResult.QUERY_OK);
+    	} catch (Exception e) {
+    		return new DbQueryStatus("Could not follow profile", DbQueryExecResult.QUERY_ERROR_GENERIC);
+    	}
 	}
 
 	@Override
 	public DbQueryStatus unfollowFriend(String userName, String frndUserName) {
+		//PUT
 		
-		return null;
+		try (Session session = ProfileMicroserviceApplication.driver.session()){
+			Transaction trans = session.beginTransaction();
+			
+			String queryStr = String.format("MATCH (follower)-[rel:follows]->(followee)  WHERE (follower.userName=\"%s\" AND followee.userName=\"%s\") DELETE rel", userName, frndUserName);
+			trans.run(queryStr);
+			
+			trans.success();
+
+    		return  new DbQueryStatus("Successfully unfollowed profile", DbQueryExecResult.QUERY_OK);
+    	} catch (Exception e) {
+    		return new DbQueryStatus("Could not unfollow profile", DbQueryExecResult.QUERY_ERROR_GENERIC);
+    	}
 	}
 
 	@Override
