@@ -92,7 +92,26 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 
 	@Override
 	public DbQueryStatus deleteSongFromDb(String songId) {
+		//PUT
 		
-		return null;
+		try (Session session = ProfileMicroserviceApplication.driver.session()){
+			Transaction trans = session.beginTransaction();
+			
+			String queryStr = String.format("MATCH (s:song) WHERE (s.songId=\"%s\") RETURN s", songId);
+			StatementResult result = trans.run(queryStr);
+			
+			if (!result.hasNext()) {  //song node does not exist
+				return new DbQueryStatus("Song does not exist", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+			}
+			
+			queryStr = String.format("MATCH (song:song) WHERE (song.songId=\"%s\") DETACH DELETE song", songId);
+			trans.run(queryStr);
+			
+			trans.success();
+
+    		return  new DbQueryStatus("Successfully deleted song", DbQueryExecResult.QUERY_OK);
+    	} catch (Exception e) {
+    		return new DbQueryStatus("Could not delete song", DbQueryExecResult.QUERY_ERROR_GENERIC);
+    	}
 	}
 }

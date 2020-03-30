@@ -104,7 +104,47 @@ public class ProfileDriverImpl implements ProfileDriver {
 
 	@Override
 	public DbQueryStatus getAllSongFriendsLike(String userName) {
+		//GET
 			
-		return null;
+		try (Session session = ProfileMicroserviceApplication.driver.session()){
+			Transaction trans = session.beginTransaction();
+			String data = null;
+			String followee = null;
+			
+			String queryStr = String.format("MATCH (follower)-[:follows]->(followee)-[:created]->(playlist)-[]->(song)  WHERE (follower.userName=\"%s\") RETURN followee.userName, song.songId", userName);
+			
+			StatementResult result = trans.run(queryStr);
+			
+			while (result.hasNext()) {
+				Record next = result.next();
+				
+				if (followee == null) {
+					data += "{\n\t";
+					data += next.get( "followee.userName" ).asString();
+					data += ": [";
+					
+				} else if(!(followee.equals(next.get( "followee.userName" ).asString()) ) ) {
+					data += "],";
+					data += next.get( "followee.userName" ).asString();
+					data += ": [";
+					
+				} else {
+					data += ",\n";
+				}
+				
+				followee = next.get( "followee.userName" ).asString();
+				
+				data += "\n\t" + next.get( "song.songId" ).asString();
+				
+			}
+			
+			data += "]\n}";
+			
+			trans.success();
+
+    		return  new DbQueryStatus(data, DbQueryExecResult.QUERY_OK);
+    	} catch (Exception e) {
+    		return new DbQueryStatus("Could not show all songs friends like", DbQueryExecResult.QUERY_ERROR_GENERIC);
+    	}
 	}
 }
