@@ -110,9 +110,13 @@ public class ProfileController {
 			HttpServletRequest request) {
 
 		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
 
-		return null;
+		DbQueryStatus dbQueryStatus = profileDriver.getAllSongFriendsLike(userName);
+				
+		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+		response.put("data", dbQueryStatus.getMessage());
+
+		return response;
 	}
 
 
@@ -184,8 +188,22 @@ public class ProfileController {
 			HttpServletRequest request) {
 
 		Map<String, Object> response = new HashMap<String, Object>();
-		response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+
+		DbQueryStatus dbQueryStatus = playlistDriver.deleteSongFromDb(songId);
 		
-		return null;
+		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_GENERIC)) {
+			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+			return response;
+		}
+		
+		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_NOT_FOUND)) {
+			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+			return response;
+		}
+				
+		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+		response.put("data", dbQueryStatus.getMessage());
+
+		return response;
 	}
 }
