@@ -157,26 +157,26 @@ public class ProfileDriverImpl implements ProfileDriver {
 				Record next = result.next();
 				
 				if (followee == null) {
-					data += "{\n\t";
+					data += "{";
 					data += next.get( "followee.userName" ).asString();
 					data += ": [";
 					
 				} else if(!(followee.equals(next.get( "followee.userName" ).asString()) ) ) {
-					data += "],";
+					data += "], ";
 					data += next.get( "followee.userName" ).asString();
 					data += ": [";
 					
 				} else {
-					data += ",\n";
+					data += ", ";
 				}
 				
 				followee = next.get( "followee.userName" ).asString();
 				
-				data += "\n\t" + next.get( "song.songId" ).asString();
+				data += next.get( "song.songId" ).asString();
 				
 			}
 			
-			data += "]\n}";
+			data += "] }";
 			
 			trans.success();
 
