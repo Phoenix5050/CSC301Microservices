@@ -107,7 +107,6 @@ public class ProfileController {
 		
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 		response.put("data", dbQueryStatus.getMessage());
-		response.put("data", dbQueryStatus.getMessage());
 
 		return response;
 	}
