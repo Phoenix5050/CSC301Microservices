@@ -146,7 +146,7 @@ public class ProfileDriverImpl implements ProfileDriver {
 			
 		try (Session session = ProfileMicroserviceApplication.driver.session()){
 			Transaction trans = session.beginTransaction();
-			String data = null;
+			String data = "";
 			String followee = null;
 			
 			String queryStr = String.format("MATCH (follower)-[:follows]->(followee)-[:created]->(playlist)-[]->(song)  WHERE (follower.userName=\"%s\") RETURN followee.userName, song.songId", userName);

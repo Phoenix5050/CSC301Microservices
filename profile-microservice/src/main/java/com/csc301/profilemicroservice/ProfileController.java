@@ -62,12 +62,8 @@ public class ProfileController {
 
 				DbQueryStatus dbQueryStatus = profileDriver.createUserProfile(userName, fullName, password);
 				
-				if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_GENERIC)) {
-					response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-					return response;
-				}
 				response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-				response.put("data", dbQueryStatus.getMessage());
+				response.put("message", dbQueryStatus.getMessage());
 
 				return response;
 			}
@@ -93,7 +89,7 @@ public class ProfileController {
 		DbQueryStatus dbQueryStatus = profileDriver.followFriend(userName, friendUserName);
 				
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-		response.put("data", dbQueryStatus.getMessage());
+		response.put("message", dbQueryStatus.getMessage());
 
 		return response;
 			
@@ -108,6 +104,7 @@ public class ProfileController {
 
 		DbQueryStatus dbQueryStatus = profileDriver.getAllSongFriendsLike(userName);
 				
+		
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 		response.put("data", dbQueryStatus.getMessage());
 
@@ -125,7 +122,7 @@ public class ProfileController {
 		DbQueryStatus dbQueryStatus = profileDriver.unfollowFriend(userName, friendUserName);
 		
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-		response.put("data", dbQueryStatus.getMessage());
+		response.put("message", dbQueryStatus.getMessage());
 
 		return response;
 	}
@@ -139,7 +136,7 @@ public class ProfileController {
 		DbQueryStatus dbQueryStatus = playlistDriver.likeSong(userName, songId);
 				
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-		response.put("data", dbQueryStatus.getMessage());
+		response.put("message", dbQueryStatus.getMessage());
 
 		return response;
 	}
@@ -153,7 +150,7 @@ public class ProfileController {
 		DbQueryStatus dbQueryStatus = playlistDriver.unlikeSong(userName, songId);
 				
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-		response.put("data", dbQueryStatus.getMessage());
+		response.put("message", dbQueryStatus.getMessage());
 
 		return response;
 	}
@@ -168,7 +165,7 @@ public class ProfileController {
 		
 	
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-		response.put("data", dbQueryStatus.getMessage());
+		response.put("message", dbQueryStatus.getMessage());
 
 		return response;
 	}
