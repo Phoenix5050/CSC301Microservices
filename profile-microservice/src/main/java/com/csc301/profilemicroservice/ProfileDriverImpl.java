@@ -45,7 +45,14 @@ public class ProfileDriverImpl implements ProfileDriver {
 		try (Session session = ProfileMicroserviceApplication.driver.session()){
 			Transaction trans = session.beginTransaction();
 			
-			String queryStr = String.format("CREATE (:profile {userName: \"%s\", fullName: \"%s\", password: \"%s\"})", userName, fullName, password);
+			String queryStr = String.format("MATCH (profile:profile) WHERE (profile.userName=\"%s\") RETURN profile", userName);
+			StatementResult result = trans.run(queryStr);
+			
+			if (result.hasNext()) { //profile already exists
+				return  new DbQueryStatus("Profile with this username already exists", DbQueryExecResult.QUERY_ERROR_GENERIC);
+			}
+			
+			queryStr = String.format("CREATE (:profile {userName: \"%s\", fullName: \"%s\", password: \"%s\"})", userName, fullName, password);
 			trans.run(queryStr);
 			
 			queryStr = String.format("CREATE (:playlist {plName: \"%s-favorites\"})", userName);
@@ -73,7 +80,21 @@ public class ProfileDriverImpl implements ProfileDriver {
 		try (Session session = ProfileMicroserviceApplication.driver.session()){
 			Transaction trans = session.beginTransaction();
 			
-			String queryStr = String.format("MATCH (follower:profile),(followee:profile) WHERE (follower.userName=\"%s\" AND followee.userName=\"%s\") CREATE (follower)-[:follows]->(followee)", userName, frndUserName);
+			String queryStr = String.format("MATCH (p1:profile) WHERE (p1.userName=\"%s\") RETURN p1.userName", frndUserName); 
+			StatementResult result = trans.run(queryStr);
+			
+			if (!result.hasNext()) { //friend profile does not exist
+				return  new DbQueryStatus("The profile you are trying to follow does not exist", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+			}
+			
+			queryStr = String.format("MATCH (p1:profile)-[rel:follows]->(p2:profile) WHERE (p1.userName=\"%s\" AND p2.userName=\"%s\") RETURN rel", userName, frndUserName); 
+			result = trans.run(queryStr);
+			
+			if (result.hasNext()) { //relationship exists
+				return  new DbQueryStatus("Already following this profile", DbQueryExecResult.QUERY_ERROR_GENERIC);
+			} 
+			
+			queryStr = String.format("MATCH (follower:profile),(followee:profile) WHERE (follower.userName=\"%s\" AND followee.userName=\"%s\") CREATE (follower)-[:follows]->(followee)", userName, frndUserName);
 			trans.run(queryStr);
 			
 			trans.success();
@@ -91,7 +112,24 @@ public class ProfileDriverImpl implements ProfileDriver {
 		try (Session session = ProfileMicroserviceApplication.driver.session()){
 			Transaction trans = session.beginTransaction();
 			
-			String queryStr = String.format("MATCH (follower)-[rel:follows]->(followee)  WHERE (follower.userName=\"%s\" AND followee.userName=\"%s\") DELETE rel", userName, frndUserName);
+			
+			String queryStr = String.format("MATCH (p1:profile) WHERE (p1.userName=\"%s\") RETURN p1.userName", frndUserName); 
+			StatementResult result = trans.run(queryStr);
+			
+			if (!result.hasNext()) { //friend profile does not exist
+				return  new DbQueryStatus("The profile you are trying to unfollow does not exist", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+			}
+			
+			queryStr = String.format("MATCH (p1:profile)-[rel:follows]->(p2:profile) WHERE (p1.userName=\"%s\" AND p2.userName=\"%s\") RETURN rel", userName, frndUserName); 
+			result = trans.run(queryStr);
+			
+			if (!result.hasNext()) { //relationship does not exist
+				return  new DbQueryStatus("Not following this profile", DbQueryExecResult.QUERY_ERROR_GENERIC);
+			} 
+			
+			
+			
+			queryStr = String.format("MATCH (follower)-[rel:follows]->(followee)  WHERE (follower.userName=\"%s\" AND followee.userName=\"%s\") DELETE rel", userName, frndUserName);
 			trans.run(queryStr);
 			
 			trans.success();
@@ -108,7 +146,7 @@ public class ProfileDriverImpl implements ProfileDriver {
 			
 		try (Session session = ProfileMicroserviceApplication.driver.session()){
 			Transaction trans = session.beginTransaction();
-			String data = null;
+			String data = "";
 			String followee = null;
 			
 			String queryStr = String.format("MATCH (follower)-[:follows]->(followee)-[:created]->(playlist)-[]->(song)  WHERE (follower.userName=\"%s\") RETURN followee.userName, song.songId", userName);
