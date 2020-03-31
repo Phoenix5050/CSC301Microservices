@@ -72,7 +72,7 @@ public class ProfileController {
 				return response;
 			}
 			else {
-				DbQueryStatus dbQueryStatus = new DbQueryStatus("Data provided for profile information was not string type.", DbQueryExecResult.QUERY_ERROR_GENERIC);
+				DbQueryStatus dbQueryStatus = new DbQueryStatus("Data provided for profile information was not string type", DbQueryExecResult.QUERY_ERROR_GENERIC);
 				response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 				return response;
 			}
@@ -91,11 +91,6 @@ public class ProfileController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		
 		DbQueryStatus dbQueryStatus = profileDriver.followFriend(userName, friendUserName);
-				
-		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_GENERIC)) {
-			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-			return response;
-		}
 				
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 		response.put("data", dbQueryStatus.getMessage());
@@ -129,11 +124,6 @@ public class ProfileController {
 
 		DbQueryStatus dbQueryStatus = profileDriver.unfollowFriend(userName, friendUserName);
 		
-		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_GENERIC)) {
-			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-			return response;
-		}
-		
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 		response.put("data", dbQueryStatus.getMessage());
 
@@ -147,11 +137,6 @@ public class ProfileController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		
 		DbQueryStatus dbQueryStatus = playlistDriver.likeSong(userName, songId);
-		
-		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_GENERIC)) {
-			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-			return response;
-		}
 				
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 		response.put("data", dbQueryStatus.getMessage());
@@ -166,16 +151,6 @@ public class ProfileController {
 		Map<String, Object> response = new HashMap<String, Object>();
 		
 		DbQueryStatus dbQueryStatus = playlistDriver.unlikeSong(userName, songId);
-		
-		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_GENERIC)) {
-			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-			return response;
-		}
-		
-		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_NOT_FOUND)) {
-			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-			return response;
-		}
 				
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 		response.put("data", dbQueryStatus.getMessage());
@@ -191,16 +166,7 @@ public class ProfileController {
 
 		DbQueryStatus dbQueryStatus = playlistDriver.deleteSongFromDb(songId);
 		
-		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_GENERIC)) {
-			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-			return response;
-		}
-		
-		if(dbQueryStatus.getdbQueryExecResult().equals(DbQueryExecResult.QUERY_ERROR_NOT_FOUND)) {
-			response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
-			return response;
-		}
-				
+	
 		response = Utils.setResponseStatus(response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 		response.put("data", dbQueryStatus.getMessage());
 
